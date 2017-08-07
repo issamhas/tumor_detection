@@ -1,6 +1,8 @@
 from PIL import Image
 import os, sys
 import tensorflow as tf
+import numpy as np
+import csv
 #constants
 _imgPath = 'bc_photos/mdb'
 #image = Image.open('bc_photos/mdb322.pgm')
@@ -51,6 +53,7 @@ def get_queue():
 
 def decode():
 #filenames queue from get queue
+	labels = gen_labels('photo_labels.txt')
 	filename_q	= get_queue()
 	rdr = tf.WholeFileReader()
 	filename, content = rdr.read(filename_q)
@@ -59,11 +62,29 @@ def decode():
 	img = tf.image.decode_jpeg(content,channels=3)
 	#cast images to tensors 
 	img = tf.cast(img,tf.float32)
+	labels = tf.cast(labels, tf.int32)
 	
 	resized_img = tf.image.resize_images(img, [1024,1024])
 	
 	#batching
+	img_batch, lbl_batch = tf.train.batch([resized_img, labels], batch_size=10)
 	
+	return labels, resized_img
+
+def gen_labels(file_name):
+	labels = []
+	txt_file = csv.reader(open(file_name), delimiter=" ")
+	
+	for s in txt_file:
+		if s[2] =='NORM':
+			labels.append(0)
+		elif s[3] == 'B':
+			labels.append(1)
+		else:
+			labels.append(2)
+	#print(labels)
+	return labels
 	
 
 decode()
+#gen_labels('photo_labels.txt')
