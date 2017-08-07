@@ -1,5 +1,6 @@
 from PIL import Image
 import os, sys
+import tensorflow as tf
 #constants
 _imgPath = 'bc_photos/mdb'
 #image = Image.open('bc_photos/mdb322.pgm')
@@ -38,11 +39,31 @@ def get_file_names(path):
         filenames.append(temp_path+'.jpg')
     
 
-    print(filenames)
+    #print(filenames)
 
-    #return filenames
+    return filenames
+
+	# returns queue for holding filenames using tf
+def get_queue():
+	#get filenames 
+	fns = get_file_names(_imgPath)
+	return tf.train.string_input_producer(fns)
+
+def decode():
+#filenames queue from get queue
+	filename_q	= get_queue()
+	rdr = tf.WholeFileReader()
+	filename, content = rdr.read(filename_q)
+	#decoding images into a list of tensors, channels identifies if it's 0(default), 
+	#1(grayscale), 3(RGB) image
+	img = tf.image.decode_jpeg(content,channels=3)
+	#cast images to tensors 
+	img = tf.cast(img,tf.float32)
+	
+	resized_img = tf.image.resize_images(img, [1024,1024])
+	
+	#batching
+	
 	
 
-
-
-get_file_names(_imgPath)
+decode()
