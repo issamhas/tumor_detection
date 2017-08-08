@@ -14,6 +14,7 @@ _epochs = 20
 _trainSetSize = 200
 _testSetSize = 75
 _stepSize = 0.05
+_labelColumns = 3
 
 
 def convert_to_jpg(path):
@@ -105,16 +106,16 @@ def gen_labels(file_name):
 def simple_net():
 
 	#input placeholders for images and labels
-	x =tf.placeholder(tf.float32, [None, 1024*1024])
-	y_ = tf.placeholder(tf.float32, [None,3])
+	x =tf.placeholder(tf.float32, [None, _imgSize])
+	y_ = tf.placeholder(tf.float32, [None,_labelColumns])
 
 	#generate flattened 1024x1024 images and labels from 
 	images = get_flatened_images(_imgPath)
-	labels = gen_labels('photo_labels.txt')
+	labels = gen_labels(_labelsPath)
 	
 	#Weights and biases initialization
-	W = tf.Variable(tf.zeros([1024*1024,3]))
-	b = tf.Variable(tf.zeros([3]))
+	W = tf.Variable(tf.zeros([_imgSize,_labelColumns]))
+	b = tf.Variable(tf.zeros([_labelColumns]))
 	
 	#output function from softmax "y = mx+b"
 	y = tf.nn.softmax(tf.matmul(x, W) + b)

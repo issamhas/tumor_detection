@@ -49,56 +49,18 @@ def get_file_names(path):
 def get_queue():
 	#get filenames 
 	fns = get_file_names(_imgPath)
-	return tf.train.string_input_producer(fns)
+	lbls = gen_labels('photo_labels.txt')
+	#return tf.train.string_input_producer(fns)
+	return tf.train.slice_input_producer([fns,lbls], num_epochs=10, shuffle=True)
 
-def decode():
-#filenames queue from get queue
-	labels = gen_labels('photo_labels.txt')
-	filename_q	= get_queue()
-	rdr = tf.WholeFileReader()
-	filename, content = rdr.read(filename_q)
-	#decoding images into a list of tensors, channels identifies if it's 0(default), 
-	#1(grayscale), 3(RGB) image
-	img = tf.image.decode_jpeg(content,channels=3)
-	#cast images to tensors 
-	img = tf.cast(img,tf.float32)
-	labels = tf.cast(labels, tf.float32)
-	
-	resized_img = tf.image.resize_images(img, [1024,1024])
-	
-	#batching
-	img_batch, lbl_batch = tf.train.batch([resized_img, labels], batch_size=10)
-	
-	return labels, resized_img
 
-def gen_labels(file_name):
-	labels = []
-	txt_file = csv.reader(open(file_name), delimiter=" ")
-	
-	for s in txt_file:
-		if s[2] =='NORM':
-			labels.append(0)
-		elif s[3] == 'B':
-			labels.append(1)
-		else:
-			labels.append(2)
-	#print(labels)
-	return labels
 
-def simple_nn():
-	images, labels = decode()
-	#PlaceHolder for img input 
-	x = tf.placeholder(tf.float32, [None, 1048576])
-	y_ = tf.placeholder(tf.float32, [None, 3])
-	
-	#Variables for learned weights and biases
-	W = tf.Variable(tf.zeros([1048576, 3]))
-	b = tf.Variable(tf.zeros([3]))
-	
-	#softmax model
-	y = tf.nn.softmax(tf.matmul(x,W)+b)
-	
-	
 
-simple_nn()
-#gen_labels('photo_labels.txt')
+
+
+
+
+
+
+
+
