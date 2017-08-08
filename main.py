@@ -62,7 +62,7 @@ def decode():
 	img = tf.image.decode_jpeg(content,channels=3)
 	#cast images to tensors 
 	img = tf.cast(img,tf.float32)
-	labels = tf.cast(labels, tf.int32)
+	labels = tf.cast(labels, tf.float32)
 	
 	resized_img = tf.image.resize_images(img, [1024,1024])
 	
@@ -84,7 +84,21 @@ def gen_labels(file_name):
 			labels.append(2)
 	#print(labels)
 	return labels
+
+def simple_nn():
+	images, labels = decode()
+	#PlaceHolder for img input 
+	x = tf.placeholder(tf.float32, [None, 1048576])
+	y_ = tf.placeholder(tf.float32, [None, 3])
+	
+	#Variables for learned weights and biases
+	W = tf.Variable(tf.zeros([1048576, 3]))
+	b = tf.Variable(tf.zeros([3]))
+	
+	#softmax model
+	y = tf.nn.softmax(tf.matmul(x,W)+b)
+	
 	
 
-decode()
+simple_nn()
 #gen_labels('photo_labels.txt')
