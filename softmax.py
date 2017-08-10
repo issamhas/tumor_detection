@@ -150,8 +150,6 @@ def simple_net():
 	#prediction accuracy from test data
 	print(sess.run(acc_mean, feed_dict={x: images[-_testSetSize:], y_: labels[-_testSetSize:]}))
 
-def test():
-	print('Hi')
 
 #print(gen_labels('photo_labels.txt').shape)
 #print(get_flatened_images(_imgPath).shape)
