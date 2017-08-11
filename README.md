@@ -36,7 +36,7 @@ batch_normalization. This is because it required the least tuning of parameters 
 
 ## Results and Steps for improvement
 
-The alexnet model gave a prediction accuracy of 78% on 82 testing images. The steps taken to imrove prediction results would include:
+The alexnet model gave a prediction accuracy of 80% on 82 testing images. The steps taken to imrove prediction results would include:
 1. Preprocessesing images to better identify areas of concern
 2. Artificially expanding the dataset to have more training images
 3. Experimenting with different algorithms/models and spend more time tuning hyperparameters.
