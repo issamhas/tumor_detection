@@ -34,9 +34,14 @@ into tensorflow. Once that was finished I implemented a slightly modified versio
 The main difference is for the normalization I used tensorflow's local response normalization, instead of other methods such as 
 batch_normalization. This is because it required the least tuning of parameters and provided default values for the normalization.
 
-# Results and Steps for improvement
+## Results and Steps for improvement
 
 The alexnet model gave a prediction accuracy of 78% on 82 testing images. The steps taken to imrove prediction results would include:
 1. Preprocesses images to better identify areas of concern
 2. Artificially expand dataset to have more training images
 3. Experiment with different algorithms/models and spend more time tuning hyperparameters.
+
+## Steps to Run
+
+If you'd like to run the program, feel free to download my source code. The repo doesn't contain the dataset so you would need to 
+go to http://peipa.essex.ac.uk/info/mias.html to download it. 
