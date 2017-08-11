@@ -1,4 +1,4 @@
-from softmax import get_flatened_images
+from softmax import get_flatened_images, gen_labels
 from PIL import Image
 import os, sys
 import tensorflow as tf
@@ -10,6 +10,8 @@ import cv2
 _labelsPath = 'photo_labels.txt'
 _imgPath = 'bc_photos/mdb'
 _imgDim = 1024
+_inputSize = 1024*1024
+_numClasses = 3
 #constants
 _epochs = 20
 _weight_initializer = tf.contrib.layers.xavier_initializer()
@@ -87,6 +89,16 @@ biases = {
 
 }
 
+#-------------------------- Placeholders --------------------------------------------#
+
+x = tf.placeholder(tf.float32, [None, _inputSize])
+y_ = tf.placeholder(tf.float32, [None, _numClasses])
+
+#Inputs
+
+images = get_flatened_images(_imgPath)
+labels = gen_labels('photo_labels.txt')
+
 #convolutional layers with relu
 def cnn_layer(input, filter, biases, stride_length):
 	strides=[1,stride_length,stride_length,1]
@@ -115,9 +127,9 @@ def dense_layer(input, weights, biases):
 def get_2d_images():
 	get_numpy_imgs(_imgPath)
 
-def alex_net(weights, biases):
-	images = get_flatened_images(_imgPath)
-	images = tf.reshape(images, shape=[-1, _imgDim, _imgDim,1])
+def alex_net(input, weights, biases):
+	#images = get_flatened_images(_imgPath)
+	images = tf.reshape(input, shape=[-1, _imgDim, _imgDim,1])
 	
 	#convolutional layer 1
 	c1 = cnn_layer(images, weights['conv1'], biases['biasc1'], stride_length1)
@@ -146,18 +158,44 @@ def alex_net(weights, biases):
 	
 	return tf.add(tf.matmul(dense_layer_2, weights['out']), biases['bias_out'])
 	
+_batch_size = 40
 
-	
-	
-	#print(max_pool_3)
+def gen_next_batch(k):
+	if(k==0):
+		return images[:_batch_size], labels[:_batch_size]
+	else:
+		return images[_batch_size*k:_batch_size*(k+1)], labels[_batch_size*k:_batch_size*(k+1)]
 
+def train_model():
+	_changeable_range = 6
+
+	#mmodel building
+	y = alex_net(x, weights, biases)
 	
+	#loss calculations and optimization
+	cross_entropy =  tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
+	adam_optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(cross_entropy)
 	
+	prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+	accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
 	
+	#launch interactive session
+	sess = tf.InteractiveSession()
+	tf.global_variables_initializer().run()
 	
+	for i in range(_epochs):
+		print("Starting training")
+		for k in range(_changeable_range):
+			print("Start minibatch "+str(k))
+			image_btch, label_btch = gen_next_batch(k)
+			_, btch_acc = sess.run([adam_optimizer, accuracy],feed_dict={x:image_btch ,y_:label_btch})
+			print("End minibatch" +str(btch_acc))
 	
-	
-	
-print(alex_net(weights,biases))	
-	
+		#_changeable_range = 3
+	print("End training")
+	#test_acc = accuracy.eval({x: images[-82:], y_:labels[-82:]})
+	test_acc=sess.run(accuracy,feed_dict={x: images[-82:], y_:labels[-82:]})
+	print(test_acc)
+#print(alex_net(x,weights,biases))	
+train_model()
 	
